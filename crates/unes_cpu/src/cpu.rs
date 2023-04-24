@@ -156,22 +156,15 @@ impl CPU {
     pub fn check_flag(&self, flag: u8) -> bool {
         self.status & flag != 0
     }
-    pub fn set_flag(&mut self, flag: u8) {
-        self.status |= flag;
-    }
-    pub fn clear_flag(&mut self, flag: u8) {
-        self.status &= !flag;
+    pub fn set_flag(&mut self, flag: u8, state: bool) {
+        if state {
+            self.status |= flag;
+        } else {
+            self.status &= !flag;
+        }
     }
     pub fn update_zero_negative_flags(&mut self, result: u8) {
-        if result == 0 {
-            self.set_flag(ZERO_FLAG);
-        } else {
-            self.clear_flag(ZERO_FLAG);
-        }
-        if result & 0b1000_0000 != 0 {
-            self.set_flag(NEGATIVE_FLAG);
-        } else {
-            self.clear_flag(NEGATIVE_FLAG);
-        }
+        self.set_flag(ZERO_FLAG, result == 0);
+        self.set_flag(NEGATIVE_FLAG, result & 0b1000_0000 != 0);
     }
 }

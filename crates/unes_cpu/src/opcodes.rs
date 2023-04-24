@@ -4,6 +4,8 @@ use crate::flags::*;
 pub fn match_opcode(code: u8) -> (Instruction, AddrMode, u8) {
     // ins, mode, base cycles
     match code {
+        // adc
+        0x69 => (adc, AddrMode::Immediate, 2),
         // brk
         0x00 => (brk, AddrMode::Implied, 7),
         // bne
@@ -33,6 +35,27 @@ pub fn match_opcode(code: u8) -> (Instruction, AddrMode, u8) {
         0xAA => (tax, AddrMode::Implied, 2),
         _ => panic!("{:?} opcode is not supported!", code)
     }
+}
+
+fn adc(cpu: &mut CPU, addr: Option<u16>) -> u8 {
+    let operand = cpu.memory.read(
+        addr.expect("Invalid ADC operand!")
+    );
+    let (mut res, carry) = cpu.reg_a.overflowing_add(operand);
+    // check prev carry
+    if cpu.check_flag(CARRY_FLAG) { res += 1 };
+    // set new carry
+    cpu.set_flag(CARRY_FLAG, carry);
+    // set overflow
+    cpu.set_flag(
+        OVERFLOW_FLAG,
+        (operand ^ res) & (cpu.reg_a ^ res) & 0x80 != 0
+    );
+    // assign reg value
+    cpu.reg_a = res;
+
+    cpu.update_zero_negative_flags(cpu.reg_a);
+    if cpu.addr_page_crossed { 1 } else { 0 }
 }
 
 fn brk(cpu: &mut CPU, _addr: Option<u16>) -> u8 {

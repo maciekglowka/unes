@@ -47,7 +47,7 @@ mod tests {
         let mut cpu = CPU::default();
         // load executable
         cpu.load_executable::<2>(0x8000, &[0xd0, 0x03]);
-        cpu.clear_flag(ZERO_FLAG);
+        cpu.set_flag(ZERO_FLAG, false);
         cpu.step();
         // expected pc = 0x8000 + 0x02 + 0x03
         assert!(cpu.pc == 0x8005);
@@ -57,7 +57,7 @@ mod tests {
         let mut cpu = CPU::default();
         // load executable
         cpu.load_executable::<2>(0x8000, &[0xd0, 0xf8]);
-        cpu.clear_flag(ZERO_FLAG);
+        cpu.set_flag(ZERO_FLAG, false);
         cpu.step();
         // expected negative offset by 0x06 from the instruction start
         assert!(cpu.pc == 0x7ffa);

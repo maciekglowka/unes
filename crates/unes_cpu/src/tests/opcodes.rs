@@ -4,6 +4,92 @@ mod tests {
     use crate::flags::*;
 
     #[test]
+    fn test_adc_basic() {
+        let mut cpu = CPU::default();
+        cpu.reg_a = 0x20;
+        cpu.load_executable::<2>(0x8000, &[0x69, 0x10]);
+        cpu.run();
+        assert!(cpu.reg_a == 0x30);
+        assert!(!cpu.check_flag(ZERO_FLAG));
+        assert!(!cpu.check_flag(NEGATIVE_FLAG));
+        assert!(!cpu.check_flag(OVERFLOW_FLAG));
+    }
+    #[test]
+    fn test_adc_zero_flag() {
+        let mut cpu = CPU::default();
+        cpu.reg_a = 0x00;
+        cpu.load_executable::<2>(0x8000, &[0x69, 0x00]);
+        cpu.run();
+        assert!(cpu.reg_a == 0x00);
+        assert!(cpu.check_flag(ZERO_FLAG));
+        assert!(!cpu.check_flag(NEGATIVE_FLAG));
+        assert!(!cpu.check_flag(OVERFLOW_FLAG));
+    }
+    #[test]
+    fn test_adc_carry_flag() {
+        let mut cpu = CPU::default();
+        cpu.reg_a = 0x11;
+        cpu.load_executable::<4>(0x8000, &[0x69, 0xf0, 0x69, 0x05]);
+
+        // 1st
+        cpu.step();
+        // overflowed result
+        assert!(cpu.reg_a == 0x01);
+        // carry set
+        assert!(cpu.check_flag(CARRY_FLAG)); 
+        assert!(!cpu.check_flag(ZERO_FLAG));
+        assert!(!cpu.check_flag(NEGATIVE_FLAG));
+        assert!(!cpu.check_flag(OVERFLOW_FLAG));
+
+        // 2nd
+        cpu.step();
+        // result incl. +1 from CARRY
+        assert!(cpu.reg_a == 0x07);
+        // carry cleared
+        assert!(!cpu.check_flag(CARRY_FLAG)); 
+        assert!(!cpu.check_flag(ZERO_FLAG));
+        assert!(!cpu.check_flag(NEGATIVE_FLAG));
+        assert!(!cpu.check_flag(OVERFLOW_FLAG));
+    }
+    #[test]
+    fn test_adc_carry_flag_high() {
+        // test that 0xff + carry won't cause overflow
+        let mut cpu = CPU::default();
+        cpu.reg_a = 0xff;
+        cpu.load_executable::<5>(0x8000, &[0x69, 0xff, 0x69, 0xff, 0x00]);
+        cpu.run();
+        assert!(cpu.reg_a == 0xfe);
+        assert!(cpu.check_flag(CARRY_FLAG));
+        assert!(cpu.check_flag(NEGATIVE_FLAG));
+        assert!(!cpu.check_flag(OVERFLOW_FLAG));
+    }
+    #[test]
+    fn test_adc_overflow_flag_positive() {
+        let mut cpu = CPU::default();
+        cpu.reg_a = 0x50;
+        cpu.load_executable::<3>(0x8000, &[0x69, 0x50, 0x00]);
+        cpu.step();
+        assert!(cpu.reg_a == 0xa0);
+        // overflow and negative should be set
+        assert!(cpu.check_flag(OVERFLOW_FLAG));
+        assert!(cpu.check_flag(NEGATIVE_FLAG));
+        // carry is clear
+        assert!(!cpu.check_flag(CARRY_FLAG));
+    }
+    #[test]
+    fn test_adc_overflow_flag_negative() {
+        let mut cpu = CPU::default();
+        cpu.reg_a = 0xd0;
+        cpu.load_executable::<3>(0x8000, &[0x69, 0x90, 0x00]);
+        cpu.step();
+        assert!(cpu.reg_a == 0x60);
+        // overflow and carry should be set
+        assert!(cpu.check_flag(OVERFLOW_FLAG));
+        assert!(cpu.check_flag(CARRY_FLAG));
+        // negative is clear
+        assert!(!cpu.check_flag(NEGATIVE_FLAG));
+    }
+    #[test]
     fn test_inx_0x20() {
         let mut cpu = CPU::default();
         cpu.reg_x = 0x20;
