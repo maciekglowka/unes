@@ -65,6 +65,15 @@ mod tests {
         assert!(!cpu.check_flag(NEGATIVE_FLAG)); 
     }
     #[test]
+    fn test_sta_absolute() {
+        let mut cpu = CPU::default();
+        cpu.load_executable::<3>(0x8000, &[0x8d, 0x05, 0xf0]);
+        cpu.reg_a = 0xfd;
+        let cycles = cpu.step();
+        assert!(cpu.memory.read(0xf005) == 0xfd);
+        assert!(cycles == 4);
+    }
+    #[test]
     fn test_tax_0x20() {
         let mut cpu = CPU::default();
         cpu.reg_a = 0x20;

@@ -40,6 +40,8 @@ pub enum AddrMode {
     Implied,
     Immediate,
     Indirect,
+    IndirectX,
+    IndirectY,
     Relative,
     ZeroPage,
     ZeroPageX,
@@ -54,6 +56,8 @@ impl AddrMode {
             Self::Implied => 0,
             Self::Immediate => 1,
             Self::Indirect => 2,
+            Self::IndirectX => 1,
+            Self::IndirectY => 1,
             Self::Relative => 1,
             Self::ZeroPage => 1,
             Self::ZeroPageX => 1,
@@ -122,6 +126,17 @@ impl CPU {
             AddrMode::Implied => panic!("Invalid addr mode!"),
             AddrMode::Immediate => self.pc,
             AddrMode::Indirect => self.memory.read_u16(self.pc),
+            AddrMode::IndirectX => {
+                let base = self.memory.read(self.pc);
+                self.memory.read_u16(base.wrapping_add(self.reg_x) as u16)
+            },
+            AddrMode::IndirectY => {
+                let zero_addr = self.memory.read(self.pc);
+                let base = self.memory.read_u16(zero_addr as u16);
+                let addr = base.wrapping_add(self.reg_y as u16);
+                if is_page_crossed(base, addr) { self.addr_page_crossed = true }
+                addr
+            }
             AddrMode::Relative => self.pc,
             AddrMode::ZeroPage => self.memory.read(self.pc) as u16,
             AddrMode::ZeroPageX => self.memory.read(self.pc).wrapping_add(self.reg_x) as u16,

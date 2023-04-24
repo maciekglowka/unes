@@ -17,10 +17,18 @@ pub fn match_opcode(code: u8) -> (Instruction, AddrMode, u8) {
         0xBD => (lda, AddrMode::AbsoluteX, 4),
         0xB9 => (lda, AddrMode::AbsoluteY, 4),
         0xA9 => (lda, AddrMode::Immediate, 2),
+        0xA1 => (lda, AddrMode::IndirectX, 6),
+        0xB1 => (lda, AddrMode::IndirectY, 5),
         0xA5 => (lda, AddrMode::ZeroPage, 3),
         0xB5 => (lda, AddrMode::ZeroPageX, 4),
         // ldx
         0xB6 => (ldx, AddrMode::ZeroPageY, 4),
+        // sta
+        0x8D => (sta, AddrMode::Absolute, 4),
+        0x9D => (sta, AddrMode::AbsoluteX, 5),
+        0x99 => (sta, AddrMode::AbsoluteY, 5),
+        0x85 => (sta, AddrMode::ZeroPage, 3),
+        0x95 => (sta, AddrMode::ZeroPageX, 4),
         // tax
         0xAA => (tax, AddrMode::Implied, 2),
         _ => panic!("{:?} opcode is not supported!", code)
@@ -39,6 +47,7 @@ fn bne(cpu: &mut CPU, addr: Option<u16>) -> u8 {
         cpu.pc = cpu.pc.wrapping_add(offset as u16);
     }
     0
+    // TODO extra cycles
 }
 fn inx(cpu: &mut CPU, _addr: Option<u16>) -> u8 {
     cpu.reg_x = cpu.reg_x.wrapping_add(1);
@@ -64,6 +73,13 @@ fn ldx(cpu: &mut CPU, addr: Option<u16>) -> u8 {
     );
     cpu.update_zero_negative_flags(cpu.reg_x);
     if cpu.addr_page_crossed { 1 } else { 0 }
+}
+fn sta(cpu: &mut CPU, addr: Option<u16>) -> u8 {
+    cpu.memory.write(
+        addr.expect("Invalid LDA operand!"),
+        cpu.reg_a
+    );
+    0
 }
 fn tax(cpu: &mut CPU, _addr: Option<u16>) -> u8 {
     cpu.reg_x = cpu.reg_a;

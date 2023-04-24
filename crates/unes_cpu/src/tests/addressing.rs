@@ -104,4 +104,30 @@ mod tests {
         cpu.step();
         assert!(cpu.pc == 0x10af);
     }
+    #[test]
+    fn test_lda_indirect_x() {
+        let mut cpu = CPU::default();
+        // load executable
+        cpu.load_executable::<3>(0x8000, &[0xa1, 0x30, 0x00]);
+        // load memory table entry at 0x0033
+        cpu.load::<2>(0x0033, &[0xaf, 0x10]);
+        // load operand at 0x10af
+        cpu.load::<1>(0x10af, &[0xba]);
+        cpu.reg_x = 3;
+        cpu.step();
+        assert!(cpu.reg_a == 0xba);
+    }
+    #[test]
+    fn test_lda_indirect_y() {
+        let mut cpu = CPU::default();
+        // load executable
+        cpu.load_executable::<3>(0x8000, &[0xb1, 0x04, 0x00]);
+        // load memory table entry at 0x0004
+        cpu.load::<2>(0x0004, &[0x34, 0x12]);
+        // load operand at 0x1236
+        cpu.load::<1>(0x1236, &[0xac]);
+        cpu.reg_y = 2;
+        cpu.step();
+        assert!(cpu.reg_a == 0xac);
+    }
 }
