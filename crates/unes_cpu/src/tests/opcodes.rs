@@ -33,13 +33,25 @@ mod tests {
         assert!(!cpu.check_flag(NEGATIVE_FLAG));
     }
     #[test]
-    fn test_lda_zero() {
+    fn test_lda_zero_flag() {
+        // immediate addr, zero flag set
         let mut cpu = CPU::default();
         cpu.load_executable::<3>(0x8000, &[0xa9, 0x00, 0x00]);
-        cpu.run();
+        let cycles = cpu.step();
         assert!(cpu.reg_a == 0x00);
+        assert!(cycles == 2);
         assert!(cpu.check_flag(ZERO_FLAG));
         assert!(!cpu.check_flag(NEGATIVE_FLAG));
+    }
+    #[test]
+    fn test_lda_page_cross() {
+        let mut cpu = CPU::default();
+        cpu.load_executable::<4>(0x8000, &[0xbd, 0xfe, 0x90, 0x00]);
+        cpu.load::<1>(0x911e, &[0xaf]);
+        cpu.reg_x = 0x20;
+        let cycles = cpu.step();
+        assert!(cycles == 5);
+        assert!(cpu.reg_a == 0xaf);
     }
     #[test]
     fn test_tax_zero() {

@@ -47,7 +47,7 @@ mod tests {
         let mut cpu = CPU::default();
         // load executable
         cpu.load_executable::<2>(0x8000, &[0xd0, 0x03]);
-        cpu.unset_flag(ZERO_FLAG);
+        cpu.clear_flag(ZERO_FLAG);
         cpu.step();
         // expected pc = 0x8000 + 0x02 + 0x03
         assert!(cpu.pc == 0x8005);
@@ -57,7 +57,7 @@ mod tests {
         let mut cpu = CPU::default();
         // load executable
         cpu.load_executable::<2>(0x8000, &[0xd0, 0xf8]);
-        cpu.unset_flag(ZERO_FLAG);
+        cpu.clear_flag(ZERO_FLAG);
         cpu.step();
         // expected negative offset by 0x06 from the instruction start
         assert!(cpu.pc == 0x7ffa);
@@ -88,10 +88,20 @@ mod tests {
         let mut cpu = CPU::default();
         // load executable
         cpu.load_executable::<4>(0x8000, &[0xb9, 0x03, 0x10, 0x00]);
-        // load operand at 0x1005
+        // load operand at 0x1006
         cpu.load::<1>(0x1006, &[0xaf]);
         cpu.reg_y = 3;
         cpu.run();
         assert!(cpu.reg_a == 0xaf);
+    }
+    #[test]
+    fn test_jmp_indirect() {
+        let mut cpu = CPU::default();
+        // load executable
+        cpu.load_executable::<4>(0x8000, &[0x6c, 0x05, 0x10, 0x00]);
+        // load addr at 0x1005
+        cpu.load::<2>(0x1005, &[0xaf, 0x10]);
+        cpu.step();
+        assert!(cpu.pc == 0x10af);
     }
 }
