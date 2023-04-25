@@ -5,14 +5,14 @@ mod tests {
 
     #[test]
     fn test_lda_immediate() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         cpu.load_executable::<3>(0x8000, &[0xa9, 0x05, 0x00]);
         cpu.run();
         assert!(cpu.reg_a == 0x05);
     }
     #[test]
     fn test_lda_zero_page() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<3>(0x8000, &[0xa5, 0x05, 0x00]);
         // load operand at 0x05
@@ -22,7 +22,7 @@ mod tests {
     }
     #[test]
     fn test_lda_zero_page_x() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<3>(0x8000, &[0xb5, 0x03, 0x00]);
         // load operand at 0x05
@@ -33,7 +33,7 @@ mod tests {
     }
     #[test]
     fn test_ldx_zero_page_y() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<3>(0x8000, &[0xb6, 0x03, 0x00]);
         // load operand at 0x07
@@ -44,7 +44,7 @@ mod tests {
     }
     #[test]
     fn test_bne_relative_positive() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<2>(0x8000, &[0xd0, 0x03]);
         cpu.set_flag(ZERO_FLAG, false);
@@ -54,7 +54,7 @@ mod tests {
     }
     #[test]
     fn test_bne_relative_negative() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<2>(0x8000, &[0xd0, 0xf8]);
         cpu.set_flag(ZERO_FLAG, false);
@@ -64,7 +64,7 @@ mod tests {
     }
     #[test]
     fn test_lda_absolute() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<4>(0x8000, &[0xad, 0x05, 0x10, 0x00]);
         // load operand at 0x1005
@@ -74,7 +74,7 @@ mod tests {
     }
     #[test]
     fn test_lda_absolute_x() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<4>(0x8000, &[0xbd, 0x03, 0x10, 0x00]);
         // load operand at 0x1005
@@ -85,7 +85,7 @@ mod tests {
     }
     #[test]
     fn test_lda_absolute_y() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<4>(0x8000, &[0xb9, 0x03, 0x10, 0x00]);
         // load operand at 0x1006
@@ -96,7 +96,7 @@ mod tests {
     }
     #[test]
     fn test_jmp_indirect() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<4>(0x8000, &[0x6c, 0x05, 0x10, 0x00]);
         // load addr at 0x1005
@@ -106,7 +106,7 @@ mod tests {
     }
     #[test]
     fn test_lda_indirect_x() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<3>(0x8000, &[0xa1, 0x30, 0x00]);
         // load memory table entry at 0x0033
@@ -119,7 +119,7 @@ mod tests {
     }
     #[test]
     fn test_lda_indirect_y() {
-        let mut cpu = CPU::default();
+        let mut cpu = CPU::new();
         // load executable
         cpu.load_executable::<3>(0x8000, &[0xb1, 0x04, 0x00]);
         // load memory table entry at 0x0004

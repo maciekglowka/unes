@@ -82,10 +82,14 @@ pub struct CPU {
     pub reg_x: u8,
     pub reg_y: u8,
     pub pc: u16,
+    pub sp: u8,
     pub status: u8,
     pub memory: Memory
 }
 impl CPU {
+    pub fn new() -> CPU {
+        CPU { status: 0b0011_0000, sp: 0xff, ..Default::default() }
+    }
     pub fn load<const S: usize>(&mut self, addr: u16, code: &[u8; S]) {
         self.memory.load::<S>(addr, code);
     }
